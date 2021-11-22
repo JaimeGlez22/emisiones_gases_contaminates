@@ -11,6 +11,9 @@ os.environ["PROJ_LIB"] = proj_lib
 
 from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
+from datetime import date
+
+from sentinelsat import SentinelAPI, read_geojson, geojson_to_wkt
 
 
 #funtion
@@ -165,6 +168,13 @@ def create_map(document, num, region):
         print("La imagen se ha guardado como: " + image_name)
     
     
+    
+def user_create_date():
+    age = int(input("Año: ")) 
+    month = int(input("Mes: "))
+    day = int(input("Dia: "))
+    return date(age, month, day)
+    
 #Component to study
 component = input("¿Qué componente quiere estudiar? NO2, SO2, O3, AER: ").upper()
 prodtype = ""
@@ -189,27 +199,17 @@ directory = input("Carpeta donde quieres guardar los archivos: ")
 os.chdir(directory)
 
 
-from datetime import date
+
 
 print("\nPeriodo de deteccion (introducir con numeros)")
 print("Fecha inicio")
 
-age_init = int(input("Año: "))
-month_init = int(input("Mes: "))
-day_init = int(input("Dia: "))
+date_init = user_create_date()
 
-date_init = date(age_init, month_init, day_init)
+print("\nFecha final")
 
-print("Fecha final")
+date_end = user_create_date()
 
-age_end = int(input("Año: ")) 
-month_end = int(input("Mes: "))
-day_end = int(input("Dia: "))
-
-date_end = date(age_end, month_end, day_end)
-
-
-from sentinelsat import SentinelAPI, read_geojson, geojson_to_wkt
 
 
 # connect to the API
@@ -235,4 +235,3 @@ for prod in product:
     document = prod[1].get("filename")
     create_map(document, f"{num_document}",region)
     num_document += 1
-    print("Siguiente archivo")
