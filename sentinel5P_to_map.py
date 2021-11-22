@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 
 #funtion
-def create_map(document, num):
+def create_map(document, num, region):
     #Document .nc to use
     if document == "":
         document = input("Nombre del archivo: ")
@@ -22,7 +22,6 @@ def create_map(document, num):
     if document[-3:-1] + document[-1] != ".nc":
         document += ".nc"
         
-    #document = "S5P_OFFL_L2__NO2____20200118T104330_20200118T122500_11734_01_010302_20200122T031557.nc"
     
     date = document[20:28]
     
@@ -65,7 +64,7 @@ def create_map(document, num):
     if analysis_component == "NO2":
         unit = "moleculas/cm2"
         data_component = data_component * data_component.multiplication_factor_to_convert_to_molecules_percm2
-        max_value = 25 * 1e14
+        max_value = 50 * 1e14
         analysis_data = "nitrogendioxide_tropospheric_column"
         
     elif analysis_component == "SO2":
@@ -112,7 +111,7 @@ def create_map(document, num):
     plt.autoscale()
     
     
-    #Establecer los valores maximos de latitud y de longitud que se representaran en el mapa
+    #Set the size of the map
     
     coordinates = read_geojson('map.geojson').get("features")[0].get("geometry").get("coordinates")[0]
     
@@ -133,22 +132,14 @@ def create_map(document, num):
     cities = []
     
     while more_cities:
-        control = input("¿Quieres añadir una ciudad en el mapa? S/N ")
-        if control == "S":
+        control = input("¿Quieres añadir una ciudad en el mapa? [S]/N ")
+        if control == "S" or control == "":
             city = input("Nombre de la ciudad en ingles: ")
             cities.append(city)
         else:
-            more_cities = False
-            
-        
+            more_cities = False            
     
-    #cities = ["Milano", "Lyon", "Monaco", "Venice", "Florence"]
-    
-    geolocator = Nominatim(user_agent="JaimeGlez")
-    
-    
-    #Clon = [9.21, 4.84, 7.41, 12.31, 11.28]
-    #Clat = [45.46, 45.73, 43.74, 45.42, 43.76]
+    geolocator = Nominatim(user_agent="JaimeGlez")    
     
     for city in cities:
         location = geolocator.geocode(city)
@@ -166,10 +157,10 @@ def create_map(document, num):
     
     plt.show()
     
-    save_picture = input("¿Quieres guardar la imagen? S/N").upper()
+    save_picture = input("¿Quieres guardar la imagen? S/N ").upper()
     if save_picture == "S":
         fig = plt.gcf()
-        image_name = analysis_component+"_"+date+num+".jpg"
+        image_name = analysis_component+"_"+date+"_"+num+".jpg"
         fig.savefig(image_name)
         print("La imagen se ha guardado como: " + image_name)
     
@@ -185,7 +176,7 @@ elif component == "SO2":
 elif component == "O3":
     prodtype = "L2__O3____"
 elif component == "AER":
-    prodtype ="L2__AER_AI"
+    prodtype = "L2__AER_AI"
     
 
 
@@ -197,13 +188,31 @@ directory = input("Carpeta donde quieres guardar los archivos: ")
 
 os.chdir(directory)
 
-from sentinelsat import SentinelAPI, read_geojson, geojson_to_wkt
+
 from datetime import date
 
+print("\nPeriodo de deteccion (introducir con numeros)")
+print("Fecha inicio")
+
+age_init = int(input("Año: "))
+month_init = int(input("Mes: "))
+day_init = int(input("Dia: "))
+
+date_init = date(age_init, month_init, day_init)
+
+print("Fecha final")
+
+age_end = int(input("Año: ")) 
+month_end = int(input("Mes: "))
+day_end = int(input("Dia: "))
+
+date_end = date(age_end, month_end, day_end)
+
+
+from sentinelsat import SentinelAPI, read_geojson, geojson_to_wkt
+
+
 # connect to the API
-
-
-
 api = SentinelAPI(user='s5pguest', password='s5pguest', 
                   api_url='https://s5phub.copernicus.eu/dhus/')
 
@@ -211,20 +220,19 @@ api = SentinelAPI(user='s5pguest', password='s5pguest',
 
 # search by polygon, time, and Hub query keywords
 footprint = geojson_to_wkt(read_geojson('map.geojson'))
-products = api.query(area = footprint,date=("20200118", "20200119"),
+products = api.query(area = footprint,date=(date_init, date_end),
                      platformname = 'Sentinel-5 Precursor', producttype = prodtype )
 
 # download all results from the search
 api.download_all(products)
 
 document = ""
-num = 1
+num_document = 1
 
 product = products.items()
 
 for prod in product:
     document = prod[1].get("filename")
-    create_map(document, f"{num}")
-    num += 1
-
-
+    create_map(document, f"{num_document}",region)
+    num_document += 1
+    print("Siguiente archivo")
