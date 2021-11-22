@@ -218,8 +218,10 @@ api = SentinelAPI(user='s5pguest', password='s5pguest',
 
 
 
+geojson_archive = input("Nombre del archivo .geojson que se va a utilizar: ")
+
 # search by polygon, time, and Hub query keywords
-footprint = geojson_to_wkt(read_geojson('map.geojson'))
+footprint = geojson_to_wkt(read_geojson(geojson_archive))
 products = api.query(area = footprint,date=(date_init, date_end),
                      platformname = 'Sentinel-5 Precursor', producttype = prodtype )
 
