@@ -12,12 +12,13 @@ os.environ["PROJ_LIB"] = proj_lib
 from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
 from datetime import date
-
+from geopy.geocoders import Nominatim
 from sentinelsat import SentinelAPI, read_geojson, geojson_to_wkt
 
 
 #funtion
 def create_map(document, num, region):
+    
     #Document .nc to use
     if document == "":
         document = input("Nombre del archivo: ")
@@ -91,7 +92,6 @@ def create_map(document, num, region):
         analysis_data = "ozone_total_vertical_column"
         
         
-        
     m = Basemap(projection = 'cyl', resolution = 'i', 
                 llcrnrlat = -90, 
                 urcrnrlat = 90,
@@ -128,9 +128,7 @@ def create_map(document, num, region):
     axes.set_xlim([lon_min, lon_max])
     
     
-    #Add cities to the map (need conection to Internet)
-    from geopy.geocoders import Nominatim
-    
+    #Add cities to the map (need conection to Internet)    
     more_cities = True
     cities = []
     
@@ -142,7 +140,7 @@ def create_map(document, num, region):
         else:
             more_cities = False            
     
-    geolocator = Nominatim(user_agent="JaimeGlez")    
+    geolocator = Nominatim(user_agent="sentinel5P_to_map")    
     
     for city in cities:
         location = geolocator.geocode(city)
@@ -158,7 +156,7 @@ def create_map(document, num, region):
     plt.title(title)
     
     
-    plt.show()
+    plt.show(block=False)
     
     save_picture = input("¿Quieres guardar la imagen? S/N ").upper()
     if save_picture == "S":
@@ -167,6 +165,7 @@ def create_map(document, num, region):
         fig.savefig(image_name)
         print("La imagen se ha guardado como: " + image_name)
     
+    plt.close()
     
     
 def user_create_date():
@@ -215,7 +214,6 @@ date_end = user_create_date()
 # connect to the API
 api = SentinelAPI(user='s5pguest', password='s5pguest', 
                   api_url='https://s5phub.copernicus.eu/dhus/')
-
 
 
 geojson_archive = input("Nombre del archivo .geojson que se va a utilizar: ")
