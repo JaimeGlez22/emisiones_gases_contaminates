@@ -1,6 +1,5 @@
 
 from netCDF4 import Dataset
-import numpy as np
 import os
 import conda
 
@@ -170,6 +169,7 @@ def create_map(document, num, region, cities):
         print("La imagen se ha guardado como: " + image_name)
         
     plt.close()
+    archive_ncd.close()
     
     
     
@@ -242,5 +242,10 @@ for prod in product:
     document = prod[1].get("filename")
     create_map(document, f"{num_document}",region, cities)
     num_document += 1
-
-
+    
+    
+#remove .nc files
+remove = input("¿Quieres eliminar los archivos .nc? [S]/N ").upper()
+if not  remove == "N":
+    for prod in product:
+        os.remove(prod[1].get("filename"))
