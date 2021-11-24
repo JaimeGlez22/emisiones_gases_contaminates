@@ -16,8 +16,24 @@ from geopy.geocoders import Nominatim
 from sentinelsat import SentinelAPI, read_geojson, geojson_to_wkt
 
 
+def cities_map():
+    #Add cities to the map (need conection to Internet)    
+    more_cities = True
+    cities = []
+    
+    while more_cities:
+        control = input("¿Quieres añadir una ciudad en el mapa? [S]/N ")
+        if control == "S" or control == "":
+            city = input("Nombre de la ciudad en ingles: ")
+            cities.append(city)
+        else:
+            more_cities = False    
+    
+    return cities
+
+
 #funtion
-def create_map(document, num, region):
+def create_map(document, num, region, cities):
     
     #Document .nc to use
     if document == "":
@@ -126,19 +142,7 @@ def create_map(document, num, region):
     axes = plt.gca()
     axes.set_ylim([lat_min, lat_max])
     axes.set_xlim([lon_min, lon_max])
-    
-    
-    #Add cities to the map (need conection to Internet)    
-    more_cities = True
-    cities = []
-    
-    while more_cities:
-        control = input("¿Quieres añadir una ciudad en el mapa? [S]/N ")
-        if control == "S" or control == "":
-            city = input("Nombre de la ciudad en ingles: ")
-            cities.append(city)
-        else:
-            more_cities = False            
+            
     
     geolocator = Nominatim(user_agent="sentinel5P_to_map")    
     
@@ -155,17 +159,18 @@ def create_map(document, num, region):
     
     plt.title(title)
     
-    
+    fig = plt.gcf()
+   
     plt.show(block=False)
     
     save_picture = input("¿Quieres guardar la imagen? S/N ").upper()
-    if save_picture == "S":
-        fig = plt.gcf()
+    if save_picture == "S":        
         image_name = analysis_component+"_"+date+"_"+num+".jpg"
         fig.savefig(image_name)
         print("La imagen se ha guardado como: " + image_name)
-    
+        
     plt.close()
+    
     
     
 def user_create_date():
@@ -226,6 +231,8 @@ products = api.query(area = footprint,date=(date_init, date_end),
 # download all results from the search
 api.download_all(products)
 
+cities = cities_map()
+
 document = ""
 num_document = 1
 
@@ -233,5 +240,7 @@ product = products.items()
 
 for prod in product:
     document = prod[1].get("filename")
-    create_map(document, f"{num_document}",region)
+    create_map(document, f"{num_document}",region, cities)
     num_document += 1
+
+
