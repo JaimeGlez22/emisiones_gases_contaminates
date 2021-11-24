@@ -32,7 +32,7 @@ def cities_map():
 
 
 #funtion
-def create_map(document, num, region, cities):
+def create_map(document, num, region, cities, geojson_archive):
     
     #Document .nc to use
     if document == "":
@@ -81,9 +81,10 @@ def create_map(document, num, region, cities):
     
     
     if analysis_component == "NO2":
+        value = input("Valor en 10^4 moleculas/cm2: ")
         unit = "moleculas/cm2"
         data_component = data_component * data_component.multiplication_factor_to_convert_to_molecules_percm2
-        max_value = 50 * 1e14
+        max_value = value * 1e14
         analysis_data = "nitrogendioxide_tropospheric_column"
         
     elif analysis_component == "SO2":
@@ -131,7 +132,7 @@ def create_map(document, num, region, cities):
     
     #Set the size of the map
     
-    coordinates = read_geojson('map.geojson').get("features")[0].get("geometry").get("coordinates")[0]
+    coordinates = read_geojson(geojson_archive).get("features")[0].get("geometry").get("coordinates")[0]
     
     lon_min = coordinates[0][0]
     lon_max = coordinates[1][0]  
@@ -148,7 +149,7 @@ def create_map(document, num, region, cities):
     for city in cities:
         location = geolocator.geocode(city)
         x,y = m(location.longitude, location.latitude)
-        plt.plot(x, y, 'ko', markersize=2.5)
+        plt.plot(x, y, 'wo', markersize=2.5)
         plt.text(x, y+0.2, city, color = 'black', fontsize=12, ha="center", 
                  fontstyle='italic', fontweight = "bold")
     
@@ -240,7 +241,7 @@ product = products.items()
 
 for prod in product:
     document = prod[1].get("filename")
-    create_map(document, f"{num_document}",region, cities)
+    create_map(document, f"{num_document}",region, cities, geojson_archive)
     num_document += 1
     
     
