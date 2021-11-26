@@ -81,17 +81,17 @@ def create_map(document, num, region, cities, geojson_archive):
     
     
     if analysis_component == "NO2":
-        value = input("Valor en 10^4 moleculas/cm2: ")
+        value = int(input("Valor en 10^14 moleculas/cm2: "))
         unit = "moleculas/cm2"
         data_component = data_component * data_component.multiplication_factor_to_convert_to_molecules_percm2
         max_value = value * 1e14
         analysis_data = "nitrogendioxide_tropospheric_column"
         
     elif analysis_component == "SO2":
-        unit = "Unidad Dobson"
-        data_component = data_component * data_component.multiplication_factor_to_convert_to_DU
-        min_value = 1
-        max_value = 20
+        unit = "moleculas/cm2"
+        value = int(input("Valor en 10^14 moleculas/cm2: "))
+        data_component = data_component * data_component.multiplication_factor_to_convert_to_molecules_percm2
+        max_value = value * 1e14
         analysis_data = "sulfurdioxide_total_vertical_column"
         
     elif analysis_component == "AERAI":
@@ -149,7 +149,7 @@ def create_map(document, num, region, cities, geojson_archive):
     for city in cities:
         location = geolocator.geocode(city)
         x,y = m(location.longitude, location.latitude)
-        plt.plot(x, y, 'wo', markersize=2.5)
+        plt.plot(x, y, 'ko', markersize=2.5)
         plt.text(x, y+0.2, city, color = 'black', fontsize=12, ha="center", 
                  fontstyle='italic', fontweight = "bold")
     
